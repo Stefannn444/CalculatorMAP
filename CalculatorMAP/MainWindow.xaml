@@ -1,0 +1,232 @@
+﻿<Window x:Class="CalculatorMAP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CalculatorMAP"
+        mc:Ignorable="d"
+        Title="Calculator" 
+        Height="525" 
+        Width="325"
+        ResizeMode="NoResize"
+        >
+
+    <Window.Resources>
+        <local:StringToBooleanConverter x:Key="StringToBooleanConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <local:AppViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <!-- Mode selector -->
+            <RowDefinition Height="120"/>
+            <!-- Display -->
+            <RowDefinition Height="40"/>
+            <!-- Memory functions -->
+            <RowDefinition Height="*"/>
+            <!-- Buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Mode selector (Standard, Scientific, etc.) -->
+        <Grid Grid.Row="0" Background="#202020">
+            <Menu Background="Transparent">
+                <MenuItem Header="≡" Background="Transparent" Foreground="White" FontSize="20">
+                    <MenuItem Header="File">
+                        <MenuItem Header="Cut" />
+                        <MenuItem Header="Copy" />
+                        <MenuItem Header="Paste" />
+                        <Separator />
+                        <MenuItem Header="Mode">
+                            <MenuItem Header="Standard" IsCheckable="True" IsChecked="{Binding IsStandardMode}" 
+                                      Command="{Binding SetModeCommand}" CommandParameter="Standard"/>
+                            <MenuItem Header="Programmer" IsCheckable="True" IsChecked="{Binding IsProgrammerMode}" 
+                                      Command="{Binding SetModeCommand}" CommandParameter="Programmer"/>
+                        </MenuItem>
+                        <MenuItem Header="DigitGrouping" IsCheckable="True" 
+                                  IsChecked="{Binding DigitGrouping}" 
+                                  Command="{Binding ToggleDigitGroupingCommand}"/>
+                    </MenuItem>
+                    <MenuItem Header="Help">
+                        <MenuItem Header="About" />
+                    </MenuItem>
+                </MenuItem>
+                <TextBlock Text="{Binding CurrentMode}" Foreground="White" FontSize="18" 
+                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </Menu>
+        </Grid>
+
+        <!-- Calculator display with programmer panel overlay -->
+        <Grid Grid.Row="1" Background="#202020">
+            <!-- Main calculator display -->
+            <StackPanel VerticalAlignment="Bottom" Margin="20,0,20,10">
+                <ListBox ItemsSource="{Binding ExpressionList}"  Foreground="#909090" FontSize="14" HorizontalAlignment="Right">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation='Horizontal'/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+                <TextBlock Text="{Binding Display}" Foreground="White" FontSize="48" HorizontalAlignment="Right"/>
+            </StackPanel>
+
+            <!-- Programmer panel overlay -->
+            <Border HorizontalAlignment="Left" Background="#202020" BorderThickness="0,0,1,0" BorderBrush="#303030"
+                  Visibility="{Binding IsProgrammerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Margin="10,5,10,5" Width="130">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- HEX -->
+                        <RadioButton Grid.Row="0" Grid.Column="0" Content="HEX" Foreground="White" Margin="0,5,0,0"
+                                    IsChecked="{Binding NumberBase,Converter={StaticResource StringToBooleanConverter}, ConverterParameter=HEX, Mode=TwoWay}"
+                                    Command="{Binding SetNumberBaseCommand}" CommandParameter="HEX"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DisplayHex}" Foreground="White" 
+                                  Margin="5,5,0,0" HorizontalAlignment="Right"/>
+
+                        <!-- DEC -->
+                        <RadioButton Grid.Row="1" Grid.Column="0" Content="DEC" Foreground="White" Margin="0,5,0,0"
+                                    IsChecked="{Binding NumberBase,Converter={StaticResource StringToBooleanConverter}, ConverterParameter=DEC, Mode=TwoWay}"
+                                    Command="{Binding SetNumberBaseCommand}" CommandParameter="DEC"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DisplayDec}" Foreground="White" 
+                                  Margin="5,5,0,0" HorizontalAlignment="Right"/>
+
+                        <!-- OCT -->
+                        <RadioButton Grid.Row="2" Grid.Column="0" Content="OCT" Foreground="White" Margin="0,5,0,0"
+                                    IsChecked="{Binding NumberBase,Converter={StaticResource StringToBooleanConverter}, ConverterParameter=OCT, Mode=TwoWay}"
+                                    Command="{Binding SetNumberBaseCommand}" CommandParameter="OCT"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DisplayOct}" Foreground="White" 
+                                  Margin="5,5,0,0" HorizontalAlignment="Right"/>
+
+                        <!-- BIN -->
+                        <RadioButton Grid.Row="3" Grid.Column="0" Content="BIN" Foreground="White" Margin="0,5,0,0"
+                                    IsChecked="{Binding NumberBase, Converter={StaticResource StringToBooleanConverter},ConverterParameter=BIN, Mode=TwoWay}"
+                                    Command="{Binding SetNumberBaseCommand}" CommandParameter="BIN"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DisplayBin}" Foreground="White" 
+                                  Margin="5,5,0,0" HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Memory functions -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="MC" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemoryClearCommand}"/>
+            <Button Grid.Column="1" Content="MR" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemoryRecallCommand}"/>
+            <Button Grid.Column="2" Content="M+" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemoryAddCommand}"/>
+            <Button Grid.Column="3" Content="M-" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemorySubtractCommand}"/>
+            <Button Grid.Column="4" Content="MS" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemoryStoreCommand}"/>
+            <Button Grid.Column="5" x:Name="MemoryPanel"  Content="M˅" Background="#202020" Foreground="White" BorderThickness="0" Command="{Binding MemoryShowCommand}"/>
+        </Grid>
+
+        <Popup IsOpen="{Binding IsMemoryPanelVisible}" StaysOpen="False" Placement="Bottom" PlacementTarget="{Binding ElementName=MemoryPanel}">
+            <Border Background="White" BorderBrush="LightGray" BorderThickness="1" CornerRadius="3">
+                <StackPanel>
+                    <Button Content="Clear memory" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0"
+                    Command="{Binding MemoryClearCommand}"/>
+                    <ItemsControl ItemsSource="{Binding MemoryValues}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Value}" FontSize="16" HorizontalAlignment="Left"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Content="MC" Margin="2,0" Command="{Binding DataContext.MemoryClearItemCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                        CommandParameter="{Binding Index}"/>
+                                        <Button Content="M+" Margin="2,0" Command="{Binding DataContext.MemoryAddItemCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                        CommandParameter="{Binding Index}"/>
+                                        <Button Content="M-" Margin="2,0" Command="{Binding DataContext.MemorySubtractItemCommand, 
+                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                        CommandParameter="{Binding Index}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Calculator buttons -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!-- Row 1 -->
+            <Button Grid.Row="0" Grid.Column="0" Content="%" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="%"/>
+            <Button Grid.Row="0" Grid.Column="1" Content="CE" Background="#333333" Foreground="White" Margin="2" Command="{Binding ClearEntryCommand}"/>
+            <Button Grid.Row="0" Grid.Column="2" Content="C" Background="#333333" Foreground="White" Margin="2" Command="{Binding ClearCommand}"/>
+            <Button Grid.Row="0" Grid.Column="3" Content="⌫" Background="#333333" Foreground="White" Margin="2" Command="{Binding BackspaceCommand}"/>
+
+            <!-- Row 2 -->
+            <Button Grid.Row="1" Grid.Column="0" Content="¹/ₓ" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="1/x"/>
+            <Button Grid.Row="1" Grid.Column="1" Content="x²" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="x^2"/>
+            <Button Grid.Row="1" Grid.Column="2" Content="²√x" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="sqrt"/>
+            <Button Grid.Row="1" Grid.Column="3" Content="÷" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="/"/>
+
+            <!-- Row 3 -->
+            <Button Grid.Row="2" Grid.Column="0" Content="7" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="7"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="8" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="8"/>
+            <Button Grid.Row="2" Grid.Column="2" Content="9" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="9"/>
+            <Button Grid.Row="2" Grid.Column="3" Content="×" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="*"/>
+
+            <!-- Row 4 -->
+            <Button Grid.Row="3" Grid.Column="0" Content="4" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="4"/>
+            <Button Grid.Row="3" Grid.Column="1" Content="5" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="5"/>
+            <Button Grid.Row="3" Grid.Column="2" Content="6" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="6"/>
+            <Button Grid.Row="3" Grid.Column="3" Content="−" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="-"/>
+
+            <!-- Row 5 -->
+            <Button Grid.Row="4" Grid.Column="0" Content="1" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="1"/>
+            <Button Grid.Row="4" Grid.Column="1" Content="2" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="2"/>
+            <Button Grid.Row="4" Grid.Column="2" Content="3" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="3"/>
+            <Button Grid.Row="4" Grid.Column="3" Content="+" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="+"/>
+
+            <!-- Row 6 -->
+            <Button Grid.Row="5" Grid.Column="0" Content="+/-" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NegateCommand}"/>
+            <Button Grid.Row="5" Grid.Column="1" Content="0" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="0"/>
+            <Button Grid.Row="5" Grid.Column="2" Content="." Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding DecimalCommand}"/>
+            <Button Grid.Row="5" Grid.Column="3" Content="=" Background="#50B4DC" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
+
+        </Grid>
+
+    </Grid>
+</Window>
