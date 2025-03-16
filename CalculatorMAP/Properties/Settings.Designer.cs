@@ -25,7 +25,7 @@ namespace CalculatorMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("\"Decimal\"")]
+        [global::System.Configuration.DefaultSettingValueAttribute("\"DEC\"")]
         public string NumberBase {
             get {
                 return ((string)(this["NumberBase"]));

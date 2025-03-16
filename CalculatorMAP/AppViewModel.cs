@@ -27,6 +27,7 @@ namespace CalculatorMAP
         private bool _isMemoryPanelVisible = false;
         private ObservableCollection<MemoryItem> _memoryValues=new ObservableCollection<MemoryItem>();
 
+  
         private bool _isStandardMode = !Properties.Settings.Default.IsProgrammerMode;
 
         private String _numberBase = Properties.Settings.Default.NumberBase;
@@ -97,25 +98,7 @@ namespace CalculatorMAP
                 OnPropertyChanged();
             }
         }
-        /* public String NumberBase
-         {
-             get => _numberBase;
-             set
-             {
-                 if (_numberBase != value)
-                 {
-                     Debug.WriteLine($"Changing NumberBase from {_numberBase} to {value}"); // Debugging
-
-                     _numberBase = value;
-                     OnPropertyChanged();
-                     Properties.Settings.Default.NumberBase = value;
-                     Properties.Settings.Default.Save();
-
-                     UpdateDisplayFormat();
-
-                 }
-             }
-         }*/
+        
 
         public String NumberBase
         {
@@ -259,9 +242,9 @@ namespace CalculatorMAP
             Debug.WriteLine($"Trying to parse: {Display} as {NumberBase}"); // Debugging
 
             // Exit early for error messages
-            /*if (!IsValidNumber(Display))
+            if (!IsValidNumber(Display))
             { Debug.WriteLine($"Invalid number format: '{Display}' for base {NumberBase}");
-            return false; }*/
+            return false; }
 
             // Try to parse based on current base
             try
@@ -308,6 +291,18 @@ namespace CalculatorMAP
             }
         }
 
+        private double ConvertToDecimal(string value)
+        {
+            switch (NumberBase)
+            {
+                case "HEX": return Convert.ToInt32(value, 16);
+                case "DEC": return double.Parse(value.Replace(",", ""));
+                case "OCT": return Convert.ToInt32(value, 8);
+                case "BIN": return Convert.ToInt32(value, 2);
+                default: return double.Parse(value);
+            }
+        }
+
         private string FormatNumberForBase(int baseValue)
         {
             if (!TryParseCurrentValue(out double value))
@@ -329,6 +324,25 @@ namespace CalculatorMAP
                     return intValue.ToString();
             }
         }
+
+        private string FormatNumberForDisplayBase(string result)
+        {
+            if (double.TryParse(result, out double value))
+            {
+                int intValue = (int)value;
+
+                switch (NumberBase)
+                {
+                    case "HEX": return Convert.ToString(intValue, 16).ToUpper();
+                    case "DEC": return DigitGrouping ? intValue.ToString("N0") : intValue.ToString();
+                    case "OCT": return Convert.ToString(intValue, 8);
+                    case "BIN": return Convert.ToString(intValue, 2);
+                    default: return intValue.ToString();
+                }
+            }
+            return result;
+        }
+
         private void UpdateDisplayFormat()
         {
             if (!TryParseCurrentValue(out double value))
@@ -383,10 +397,25 @@ namespace CalculatorMAP
         {
             String operand = ExpressionList.Count == 0 ? Display :
                             (ExpressionList.Count == 3 ? ExpressionList[2] : ExpressionList[0]);
-            String result = _appModel.CalculateUnary(operand, operation);
-            Display = result;
 
-            if (!result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+            if (IsProgrammerMode)
+            {
+                double op = ConvertToDecimal(operand);
+                String result = _appModel.CalculateUnary(op.ToString(), operation);
+
+                if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                {
+                    result = FormatNumberForDisplayBase(result);
+                }
+                Display = result;
+            }
+            else
+            {
+                String result = _appModel.CalculateUnary(operand, operation);
+                Display = result;
+            }
+
+            if (!Display.All(c => char.IsDigit(c) || c == '-' || c == '.'))
             {
                 ExpressionList.Clear();
                 return;
@@ -395,16 +424,15 @@ namespace CalculatorMAP
             switch (ExpressionList.Count)
             {
                 case 0:
-                    ExpressionList.Add(result);
+                    ExpressionList.Add(Display);
                     break;
                 case 1:
-                    ExpressionList[0] = result;
+                    ExpressionList[0] = Display;
                     break;
                 case 3:
-                    ExpressionList[2] = result;
+                    ExpressionList[2] = Display;
                     break;
             }
-
         }
 
         private void HandleBinaryOperator(string operation)
@@ -422,16 +450,41 @@ namespace CalculatorMAP
                     ExpressionList[1] = operation;
                     break;
                 case 3:
-                    String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
-                    ExpressionList.Clear();
-                    if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                    if (IsProgrammerMode)
                     {
-                        ExpressionList.Add(result);
-                        ExpressionList.Add(operation);
+                        // Convert to decimal for calculation
+                        double op1 = ConvertToDecimal(ExpressionList[0]);
+                        double op2 = ConvertToDecimal(ExpressionList[2]);
+                        String result = _appModel.CalculateBinary(op1.ToString(), ExpressionList[1], op2.ToString());
+
+                        // Format result for display
+                        if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                        {
+                            ExpressionList.Clear();
+                            result = FormatNumberForDisplayBase(result);
+                            ExpressionList.Add(result);
+                            ExpressionList.Add(operation);
+                        }
+                        else
+                        {
+                            ExpressionList.Clear();
+                        }
+                        Display = result;
                     }
-                    ////
-                    
-                    Display = result;
+                    else
+                    {
+                        ///
+                        String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
+                        ExpressionList.Clear();
+                        if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                        {
+                            ExpressionList.Add(result);
+                            ExpressionList.Add(operation);
+                        }
+                        ////
+
+                        Display = result;
+                    }
                     break;
             }
         }
@@ -486,14 +539,33 @@ namespace CalculatorMAP
             }
             else
             {
-                String result = _appModel.CalculateBinary(ExpressionList[0],ExpressionList[1],ExpressionList[2]);
-                Display = result;
-                ExpressionList.Clear();
-                if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                if (IsProgrammerMode)
                 {
-                    ExpressionList.Add(result);
+                    double op1 = ConvertToDecimal(ExpressionList[0]);
+                    double op2 = ConvertToDecimal(ExpressionList[2]);
+                    String result = _appModel.CalculateBinary(op1.ToString(), ExpressionList[1], op2.ToString());
+
+                    if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                    {
+                        ExpressionList.Clear();
+                        result = FormatNumberForDisplayBase(result);
+                        ExpressionList.Add(result);
+                    }
+                    else
+                    {
+                        ExpressionList.Clear();
+                    }
+                    Display = result;
                 }
-                
+                else{
+                    String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
+                    Display = result;
+                    ExpressionList.Clear();
+                    if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                    {
+                        ExpressionList.Add(result);
+                    }
+                }
             }
         }
        
