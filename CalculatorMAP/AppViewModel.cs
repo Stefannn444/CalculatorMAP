@@ -440,6 +440,7 @@ namespace CalculatorMAP
             }
         }
 
+
         private void UpdateMemoryState()
         {
             // Update memory values collection
@@ -460,6 +461,9 @@ namespace CalculatorMAP
 
         private void HandleUnaryOperator(string operation)
         {
+            char groupSeparator = _currentCulture.NumberFormat.NumberGroupSeparator[0];
+            char decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator[0];
+
             String operand = ExpressionList.Count == 0 ? Display :
                             (ExpressionList.Count == 3 ? ExpressionList[2] : ExpressionList[0]);
 
@@ -468,7 +472,7 @@ namespace CalculatorMAP
                 double op = ConvertToDecimal(operand);
                 String result = _appModel.CalculateUnary(op.ToString(), operation);
 
-                if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator||c==groupSeparator))
                 {
                     result = FormatNumberForDisplayBase(result);
                 }
@@ -480,7 +484,7 @@ namespace CalculatorMAP
                 Display = result;
             }
 
-            if (!Display.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+            if (!Display.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
             {
                 ExpressionList.Clear();
                 return;
@@ -502,6 +506,9 @@ namespace CalculatorMAP
 
         private void HandleBinaryOperator(string operation)
         {
+            char groupSeparator = _currentCulture.NumberFormat.NumberGroupSeparator[0];
+            char decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator[0];
+
             switch (ExpressionList.Count)
             {
                 case 0:
@@ -523,7 +530,7 @@ namespace CalculatorMAP
                         String result = _appModel.CalculateBinary(op1.ToString(), ExpressionList[1], op2.ToString());
 
                         // Format result for display
-                        if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                        if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
                         {
                             ExpressionList.Clear();
                             result = FormatNumberForDisplayBase(result);
@@ -541,7 +548,7 @@ namespace CalculatorMAP
                         ///
                         String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
                         ExpressionList.Clear();
-                        if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                        if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
                         {
                             ExpressionList.Add(result);
                             ExpressionList.Add(operation);
@@ -598,6 +605,9 @@ namespace CalculatorMAP
 
         private void HandleEquals()
         {
+            char groupSeparator = _currentCulture.NumberFormat.NumberGroupSeparator[0];
+            char decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator[0];
+
             if (ExpressionList.Count < 3)
             {
                 String result = ExpressionList[0];
@@ -607,13 +617,14 @@ namespace CalculatorMAP
             }
             else
             {
+                
                 if (IsProgrammerMode)
                 {
                     double op1 = ConvertToDecimal(ExpressionList[0]);
                     double op2 = ConvertToDecimal(ExpressionList[2]);
                     String result = _appModel.CalculateBinary(op1.ToString(), ExpressionList[1], op2.ToString());
 
-                    if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                    if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
                     {
                         ExpressionList.Clear();
                         result = FormatNumberForDisplayBase(result);
@@ -629,14 +640,14 @@ namespace CalculatorMAP
                     String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
                     Display = result;
                     ExpressionList.Clear();
-                    if (result.All(c => char.IsDigit(c) || c == '-' || c == '.'))
+                    if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
                     {
                         ExpressionList.Add(result);
                     }
                 }
             }
         }
-       
+
         private void HandleDecimal()
         {
             string decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator;
@@ -648,6 +659,7 @@ namespace CalculatorMAP
             }
         }
 
+
         private void HandleBackspace()
         {
             if (Display.Length > 1)
@@ -656,7 +668,7 @@ namespace CalculatorMAP
                 if (Display == ExpressionList[ExpressionList.Count - 1])
                 {
                     Display = Display.Substring(0, Display.Length - 1);
-                    ExpressionList[ExpressionList.Count - 1] = ExpressionList[ExpressionList.Count - 1].Substring(0, ExpressionList[ExpressionList.Count - 1].Length - 1);
+                    ExpressionList[ExpressionList.Count - 1] = Display;
                 }
                 else
                 {

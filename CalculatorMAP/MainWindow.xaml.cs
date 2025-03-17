@@ -11,9 +11,6 @@ using System.Windows.Shapes;
 
 namespace CalculatorMAP
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private AppViewModel ViewModel => DataContext as AppViewModel;
@@ -31,7 +28,9 @@ namespace CalculatorMAP
         private void Cut_Click(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(ViewModel.Display);
-            ViewModel.Display = "";
+            ViewModel.Display = "0";
+            ViewModel.ExpressionList.Clear();
+            ViewModel.ExpressionList.Add("0");
 
         }
 
