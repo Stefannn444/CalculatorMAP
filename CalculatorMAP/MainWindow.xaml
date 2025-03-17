@@ -174,8 +174,8 @@
             </Border>
         </Popup>
 
-        <!-- Calculator buttons -->
-        <Grid Grid.Row="3">
+        <!-- Standard Mode Calculator buttons -->
+        <Grid Grid.Row="3" Visibility="{Binding IsStandardMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
@@ -190,6 +190,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+
             <!-- Row 1 -->
             <Button Grid.Row="0" Grid.Column="0" Content="%" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="%"/>
             <Button Grid.Row="0" Grid.Column="1" Content="CE" Background="#333333" Foreground="White" Margin="2" Command="{Binding ClearEntryCommand}"/>
@@ -225,8 +226,67 @@
             <Button Grid.Row="5" Grid.Column="1" Content="0" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="0"/>
             <Button Grid.Row="5" Grid.Column="2" Content="." Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding DecimalCommand}"/>
             <Button Grid.Row="5" Grid.Column="3" Content="=" Background="#50B4DC" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
-
         </Grid>
 
+        <!-- Programmer Mode Calculator buttons -->
+        <Grid Grid.Row="3" Visibility="{Binding IsProgrammerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Row 1 - Hex letters -->
+            <Button Grid.Row="0" Grid.Column="0" Content="A" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="A"/>
+            <Button Grid.Row="0" Grid.Column="1" Content="%" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="%"/>
+            <Button Grid.Row="0" Grid.Column="2" Content="CE" Background="#333333" Foreground="White" Margin="2" Command="{Binding ClearEntryCommand}"/>
+            <Button Grid.Row="0" Grid.Column="3" Content="C" Background="#333333" Foreground="White" Margin="2" Command="{Binding ClearCommand}"/>
+            <Button Grid.Row="0" Grid.Column="4" Content="⌫" Background="#333333" Foreground="White" Margin="2" Command="{Binding BackspaceCommand}"/>
+
+            <!-- Row 2 -->
+            <Button Grid.Row="1" Grid.Column="0" Content="B" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="B"/>
+            <Button Grid.Row="1" Grid.Column="1" Content="¹/ₓ" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="1/x"/>
+            <Button Grid.Row="1" Grid.Column="2" Content="x²" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="x^2"/>
+            <Button Grid.Row="1" Grid.Column="3" Content="²√x" Background="#333333" Foreground="White" Margin="2" Command="{Binding UnaryOperatorCommand}" CommandParameter="sqrt"/>
+            <Button Grid.Row="1" Grid.Column="4" Content="÷" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="/"/>
+
+            <!-- Row 3 -->
+            <Button Grid.Row="2" Grid.Column="0" Content="C" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="C"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="7" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="7"/>
+            <Button Grid.Row="2" Grid.Column="2" Content="8" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="8"/>
+            <Button Grid.Row="2" Grid.Column="3" Content="9" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="9"/>
+            <Button Grid.Row="2" Grid.Column="4" Content="×" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="*"/>
+
+            <!-- Row 4 -->
+            <Button Grid.Row="3" Grid.Column="0" Content="D" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="D"/>
+            <Button Grid.Row="3" Grid.Column="1" Content="4" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="4"/>
+            <Button Grid.Row="3" Grid.Column="2" Content="5" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="5"/>
+            <Button Grid.Row="3" Grid.Column="3" Content="6" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="6"/>
+            <Button Grid.Row="3" Grid.Column="4" Content="−" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="-"/>
+
+            <!-- Row 5 -->
+            <Button Grid.Row="4" Grid.Column="0" Content="E" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="E"/>
+            <Button Grid.Row="4" Grid.Column="1" Content="1" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="1"/>
+            <Button Grid.Row="4" Grid.Column="2" Content="2" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="2"/>
+            <Button Grid.Row="4" Grid.Column="3" Content="3" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="3"/>
+            <Button Grid.Row="4" Grid.Column="4" Content="+" Background="#333333" Foreground="White" Margin="2" Command="{Binding BinaryOperatorCommand}" CommandParameter="+"/>
+
+            <!-- Row 6 -->
+            <Button Grid.Row="5" Grid.Column="0" Content="F" Background="#333333" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="F"/>
+            <Button Grid.Row="5" Grid.Column="1" Content="+/-" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NegateCommand}"/>
+            <Button Grid.Row="5" Grid.Column="2" Content="0" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="0"/>
+            <Button Grid.Row="5" Grid.Column="3" Content="." Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding DecimalCommand}"/>
+            <Button Grid.Row="5" Grid.Column="4" Content="=" Background="#50B4DC" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
+        </Grid>
     </Grid>
 </Window>

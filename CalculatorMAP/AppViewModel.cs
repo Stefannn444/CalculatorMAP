@@ -492,6 +492,7 @@ namespace CalculatorMAP
         {
             if ((NumberBase == "BIN" && number != "0" && number != "1") ||
         (NumberBase == "OCT" && int.Parse(number) > 7) ||
+        (NumberBase == "DEC" && !char.IsDigit(number[0])) ||       
         (NumberBase == "HEX" && !((number[0] >= '0' && number[0] <= '9') ||
                                  (number[0] >= 'A' && number[0] <= 'F'))))
             {
@@ -653,22 +654,6 @@ namespace CalculatorMAP
             if (ExpressionList.Count % 2 != 0)
                 ExpressionList[ExpressionList.Count - 1] = "0";
         }
-
-
-        /*private void UpdateMemoryValues()
-        {
-            MemoryValues.Clear();
-            var values = _appModel.GetMemoryValues();
-            for(int i = 0; i < values.Count; ++i)
-            {
-                 MemoryValues.Add(new MemoryItem { Index=i, Value = values[i] });
-            }
-        }
-
-        private void UpdateMemoryTruth()
-        {
-            HasMemoryValues = _appModel.HasMemoryValues();
-        }*/
 
         private void HandleMemoryShow()
         {
