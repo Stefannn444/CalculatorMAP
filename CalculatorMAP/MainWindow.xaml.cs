@@ -23,6 +23,39 @@ namespace CalculatorMAP
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
         }
 
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Jîtea Ștefan-Alexandru\n10LF232", "About", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void Cut_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(ViewModel.Display);
+            ViewModel.Display = "";
+
+        }
+
+        private void Copy_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(ViewModel.Display);
+        }
+
+        private void Paste_Click(object sender, RoutedEventArgs e)
+        {
+            if (Clipboard.ContainsText()) // Verifică dacă există text în clipboard
+            {
+                string clipboardText = Clipboard.GetText();
+                if (double.TryParse(clipboardText, out double clipboardValue)) // Verifică dacă este un număr valid
+                {
+                    ViewModel.Display += clipboardValue.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Please paste one number at a time");
+                }
+            }
+
+        }
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             

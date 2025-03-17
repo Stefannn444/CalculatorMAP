@@ -37,9 +37,9 @@
             <Menu Background="Transparent">
                 <MenuItem Header="≡" Background="Transparent" Foreground="White" FontSize="20">
                     <MenuItem Header="File">
-                        <MenuItem Header="Cut" />
-                        <MenuItem Header="Copy" />
-                        <MenuItem Header="Paste" />
+                        <MenuItem Header="Cut" Click="Cut_Click"/>
+                        <MenuItem Header="Copy" Click="Copy_Click"/>
+                        <MenuItem Header="Paste" Click="Paste_Click"/>
                         <Separator />
                         <MenuItem Header="Mode">
                             <MenuItem Header="Standard" IsCheckable="True" IsChecked="{Binding IsStandardMode}" 
@@ -52,7 +52,7 @@
                                  />
                     </MenuItem>
                     <MenuItem Header="Help">
-                        <MenuItem Header="About" />
+                        <MenuItem Header="About" Click="AboutMenuItem_Click" />
                     </MenuItem>
                 </MenuItem>
                 <TextBlock Text="{Binding CurrentMode}" Foreground="White" FontSize="18" 
