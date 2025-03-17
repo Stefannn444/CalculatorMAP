@@ -36,7 +36,7 @@
         <Grid Grid.Row="0" Background="#202020">
             <Menu Background="Transparent">
                 <MenuItem Header="≡" Background="Transparent" Foreground="White" FontSize="20">
-                    <MenuItem Header="File">
+                    <MenuItem Header="File" Foreground="Black">
                         <MenuItem Header="Cut" Click="Cut_Click"/>
                         <MenuItem Header="Copy" Click="Copy_Click"/>
                         <MenuItem Header="Paste" Click="Paste_Click"/>
@@ -51,7 +51,7 @@
                                   IsChecked="{Binding DigitGrouping}" 
                                  />
                     </MenuItem>
-                    <MenuItem Header="Help">
+                    <MenuItem Header="Help" Foreground="Black">
                         <MenuItem Header="About" Click="AboutMenuItem_Click" />
                     </MenuItem>
                 </MenuItem>
@@ -123,7 +123,7 @@
         </Grid>
 
         <!-- Memory functions -->
-        <Grid Grid.Row="2">
+        <Grid Background="Purple"  Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -175,7 +175,7 @@
         </Popup>
 
         <!-- Standard Mode Calculator buttons -->
-        <Grid Grid.Row="3" Visibility="{Binding IsStandardMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Background="Purple"  Grid.Row="3" Visibility="{Binding IsStandardMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
@@ -225,11 +225,11 @@
             <Button Grid.Row="5" Grid.Column="0" Content="+/-" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NegateCommand}"/>
             <Button Grid.Row="5" Grid.Column="1" Content="0" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="0"/>
             <Button Grid.Row="5" Grid.Column="2" Content="." Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding DecimalCommand}"/>
-            <Button Grid.Row="5" Grid.Column="3" Content="=" Background="#50B4DC" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
+            <Button Grid.Row="5" Grid.Column="3" Content="=" Background="Magenta" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
         </Grid>
 
         <!-- Programmer Mode Calculator buttons -->
-        <Grid Grid.Row="3" Visibility="{Binding IsProgrammerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Background="Purple" Grid.Row="3" Visibility="{Binding IsProgrammerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
@@ -286,7 +286,7 @@
             <Button Grid.Row="5" Grid.Column="1" Content="+/-" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NegateCommand}"/>
             <Button Grid.Row="5" Grid.Column="2" Content="0" Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding NumberCommand}" CommandParameter="0"/>
             <Button Grid.Row="5" Grid.Column="3" Content="." Background="#3B3B3B" Foreground="White" Margin="2" Command="{Binding DecimalCommand}"/>
-            <Button Grid.Row="5" Grid.Column="4" Content="=" Background="#50B4DC" Foreground="White" Margin="2" Command="{Binding EqualsCommand}"/>
+            <Button Grid.Row="5" Grid.Column="4" Content="=" Background="#50B4DC" Foreground="Magenta" Margin="2" Command="{Binding EqualsCommand}"/>
         </Grid>
     </Grid>
 </Window>

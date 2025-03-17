@@ -16,10 +16,7 @@ namespace CalculatorMAP
 {
     public class AppViewModel:INotifyPropertyChanged
     {
-        //TODO: Culture Info
-        //todo: preferences
-        //todo file about etc
-        //todo: string format for decimal number
+        
         private AppModel _appModel = new AppModel();
 
         private String _display = "0";
@@ -111,7 +108,6 @@ namespace CalculatorMAP
             {
                 if (_numberBase != value)
                 {
-                    // Parse using OLD base before changing
                     string oldBase = _numberBase;
                     double numericValue = 0;
 
@@ -125,13 +121,11 @@ namespace CalculatorMAP
                             case "BIN": numericValue = Convert.ToInt32(Display, 2); break;
                         }
 
-                        // Update base
                         _numberBase = value;
                         OnPropertyChanged();
                         Properties.Settings.Default.NumberBase = value;
                         Properties.Settings.Default.Save();
 
-                        // Format using NEW base
                         int intValue = (int)numericValue;
                         switch (value)
                         {
@@ -145,7 +139,6 @@ namespace CalculatorMAP
                     }
                     catch
                     {
-                        // Handle parsing errors
                         _numberBase = value;
                         OnPropertyChanged();
                         Properties.Settings.Default.NumberBase = value;
@@ -243,14 +236,10 @@ namespace CalculatorMAP
         private bool TryParseCurrentValue(out double value)
         {
             value = 0;
-            Debug.WriteLine($"Trying to parse: {Display} as {NumberBase}"); // Debugging
 
-            // Exit early for error messages
             if (!IsValidNumber(Display))
-            { Debug.WriteLine($"Invalid number format: '{Display}' for base {NumberBase}");
-            return false; }
+                return false;
 
-            // Try to parse based on current base
             try
             {
                 switch (NumberBase)
@@ -354,36 +343,28 @@ namespace CalculatorMAP
 
         private void UpdateDisplayFormat()
         {
-            // Get the current culture’s decimal separator.
             string decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator;
 
-            // Use the current Display as the raw input.
-            // (If you need to preserve a more exact raw input, consider storing it separately.)
             string rawInput = Display;
 
-            // Determine if the raw input contains a decimal separator and count decimals.
             int decimalCount = 0;
             int separatorIndex = rawInput.IndexOf(decimalSeparator);
             if (separatorIndex >= 0)
             {
-                // Count the number of characters after the decimal separator.
                 decimalCount = rawInput.Length - separatorIndex - decimalSeparator.Length;
             }
 
-            // Try to parse the current value.
             if (!TryParseCurrentValue(out double value))
-                return; // Abort update if parsing fails
+                return; 
 
             if (IsProgrammerMode)
             {
-                // In Programmer mode, formatting is based on the selected base.
                 switch (NumberBase)
                 {
                     case "HEX":
                         Display = Convert.ToString((int)value, 16).ToUpper();
                         break;
                     case "DEC":
-                        // For programmer mode DEC, just format as an integer.
                         Display = DigitGrouping ? ((int)value).ToString("N0", _currentCulture) : ((int)value).ToString();
                         break;
                     case "OCT":
@@ -396,44 +377,36 @@ namespace CalculatorMAP
             }
             else
             {
-                // Standard mode: handle floating point values.
                 if (DigitGrouping)
                 {
-                    // If the user has typed a decimal separator...
                     if (separatorIndex >= 0)
                     {
-                        // If there are no digits after the decimal (e.g. "6."), preserve the trailing separator.
                         if (decimalCount == 0)
                         {
                             Display = ((int)value).ToString("N0", _currentCulture) + decimalSeparator;
                         }
                         else
                         {
-                            // Build the format string dynamically based on the number of decimals.
                             string formatSpecifier = "N" + decimalCount.ToString();
                             Display = value.ToString(formatSpecifier, _currentCulture);
                         }
                     }
                     else
                     {
-                        // No decimal separator in raw input.
                         if (value == Math.Floor(value))
                             Display = ((int)value).ToString("N0", _currentCulture);
                         else
-                            // Default to "N" format if the user didn't type a decimal separator.
                             Display = value.ToString("N", _currentCulture);
                     }
                 }
                 else
                 {
-                    // Without digit grouping, just use the general format.
                     Display = value.ToString("G", _currentCulture);
                 }
             }
 
             OnPropertyChanged(nameof(Display));
 
-            // Update the ExpressionList's last element (if it's an operand) so it stays in sync.
             if (ExpressionList.Count % 2 == 1)
             {
                 ExpressionList[ExpressionList.Count - 1] = Display;
@@ -443,7 +416,6 @@ namespace CalculatorMAP
 
         private void UpdateMemoryState()
         {
-            // Update memory values collection
             MemoryValues.Clear();
             var values = _appModel.GetMemoryValues();
             for (int i = 0; i < values.Count; ++i)
@@ -451,7 +423,6 @@ namespace CalculatorMAP
                 MemoryValues.Add(new MemoryItem { Index = i, Value = values[i] });
             }
 
-            // Update memory availability flag
             HasMemoryValues = _appModel.HasMemoryValues();
         }
         #endregion
@@ -524,12 +495,10 @@ namespace CalculatorMAP
                 case 3:
                     if (IsProgrammerMode)
                     {
-                        // Convert to decimal for calculation
                         double op1 = ConvertToDecimal(ExpressionList[0]);
                         double op2 = ConvertToDecimal(ExpressionList[2]);
                         String result = _appModel.CalculateBinary(op1.ToString(), ExpressionList[1], op2.ToString());
 
-                        // Format result for display
                         if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
                         {
                             ExpressionList.Clear();
@@ -545,7 +514,7 @@ namespace CalculatorMAP
                     }
                     else
                     {
-                        ///
+                        
                         String result = _appModel.CalculateBinary(ExpressionList[0], ExpressionList[1], ExpressionList[2]);
                         ExpressionList.Clear();
                         if (result.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator))
@@ -553,7 +522,7 @@ namespace CalculatorMAP
                             ExpressionList.Add(result);
                             ExpressionList.Add(operation);
                         }
-                        ////
+                        
 
                         Display = result;
                     }
@@ -570,7 +539,6 @@ namespace CalculatorMAP
             {
                 return;
             }
-            /////
             if (ExpressionList.Count == 0 || ExpressionList.Count == 2)
             {
 
@@ -651,7 +619,6 @@ namespace CalculatorMAP
         private void HandleDecimal()
         {
             string decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator;
-            // Check if there's already a decimal separator in the current operand
             if (ExpressionList.Count > 0 && !Display.Contains(decimalSeparator))
             {
                 ExpressionList[ExpressionList.Count - 1] += decimalSeparator;

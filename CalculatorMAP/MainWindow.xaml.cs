@@ -41,12 +41,12 @@ namespace CalculatorMAP
 
         private void Paste_Click(object sender, RoutedEventArgs e)
         {
-            if (Clipboard.ContainsText()) // Verifică dacă există text în clipboard
+            if (Clipboard.ContainsText()) 
             {
                 string clipboardText = Clipboard.GetText();
-                if (double.TryParse(clipboardText, out double clipboardValue)) // Verifică dacă este un număr valid
+                if (double.TryParse(clipboardText, out double clipboardValue)) 
                 {
-                    ViewModel.Display += clipboardValue.ToString();
+                    ViewModel.Display = clipboardValue.ToString();
                 }
                 else
                 {
@@ -146,7 +146,7 @@ namespace CalculatorMAP
                     ViewModel.BinaryOperatorCommand.Execute("*");
                     break;
                 case Key.Divide:
-                case Key.OemQuestion: // '/' key
+                case Key.OemQuestion:
                     ViewModel.BinaryOperatorCommand.Execute("/");
                     break;
 
