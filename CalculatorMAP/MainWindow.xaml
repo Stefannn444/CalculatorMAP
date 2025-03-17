@@ -49,7 +49,7 @@
                         </MenuItem>
                         <MenuItem Header="DigitGrouping" IsCheckable="True" 
                                   IsChecked="{Binding DigitGrouping}" 
-                                  Command="{Binding ToggleDigitGroupingCommand}"/>
+                                 />
                     </MenuItem>
                     <MenuItem Header="Help">
                         <MenuItem Header="About" />

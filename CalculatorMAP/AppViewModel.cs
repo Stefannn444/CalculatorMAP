@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace CalculatorMAP
@@ -30,6 +31,7 @@ namespace CalculatorMAP
   
         private bool _isStandardMode = !Properties.Settings.Default.IsProgrammerMode;
 
+        private CultureInfo _currentCulture = CultureInfo.CurrentCulture;
         private String _numberBase = Properties.Settings.Default.NumberBase;
         private bool _isProgrammerMode = Properties.Settings.Default.IsProgrammerMode; 
         private bool _digitGrouping = Properties.Settings.Default.DigitGrouping;
@@ -59,6 +61,8 @@ namespace CalculatorMAP
                     OnPropertyChanged(nameof(DisplayDec));
                     OnPropertyChanged(nameof(DisplayOct));
                     OnPropertyChanged(nameof(DisplayBin));
+
+                    UpdateDisplayFormat();
                 }
             }
         }
@@ -255,7 +259,8 @@ namespace CalculatorMAP
                         value = Convert.ToInt32(Display, 16);
                         return true;
                     case "DEC":
-                        return double.TryParse(Display.Replace(",", ""), out value);
+                        string cleanDisplay = Display.Replace(_currentCulture.NumberFormat.NumberGroupSeparator, "");
+                        return double.TryParse(cleanDisplay, NumberStyles.Any, _currentCulture, out value);
                     case "OCT":
                         value = Convert.ToInt32(Display, 8);
                         return true;
@@ -263,7 +268,7 @@ namespace CalculatorMAP
                         value = Convert.ToInt32(Display, 2);
                         return true;
                     default:
-                        return double.TryParse(Display, out value);
+                        return double.TryParse(Display, NumberStyles.Any, _currentCulture, out value);
                 }
             }
             catch
@@ -276,18 +281,22 @@ namespace CalculatorMAP
             if (string.IsNullOrEmpty(value))
                 return false;
 
+            char groupSeparator = _currentCulture.NumberFormat.NumberGroupSeparator[0];
+            char decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator[0];
+
+
             switch (NumberBase)
             {
                 case "HEX":
                     return value.All(c => (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
                 case "DEC":
-                    return value.All(c => char.IsDigit(c) || c == '-' || c == '.' || c == ',');
+                    return value.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator);
                 case "OCT":
                     return value.All(c => c >= '0' && c <= '7');
                 case "BIN":
                     return value.All(c => c == '0' || c == '1');
                 default:
-                    return value.All(c => char.IsDigit(c) || c == '-' || c == '.' || c == ',');
+                    return value.All(c => char.IsDigit(c) || c == '-' || c == decimalSeparator || c == groupSeparator);
             }
         }
 
@@ -315,7 +324,7 @@ namespace CalculatorMAP
                 case 16:
                     return Convert.ToString(intValue, 16).ToUpper();
                 case 10:
-                    return DigitGrouping ? intValue.ToString("N0") : intValue.ToString();
+                    return DigitGrouping ? intValue.ToString("N0", _currentCulture) : intValue.ToString();
                 case 8:
                     return Convert.ToString(intValue, 8);
                 case 2:
@@ -334,7 +343,7 @@ namespace CalculatorMAP
                 switch (NumberBase)
                 {
                     case "HEX": return Convert.ToString(intValue, 16).ToUpper();
-                    case "DEC": return DigitGrouping ? intValue.ToString("N0") : intValue.ToString();
+                    case "DEC": return DigitGrouping ? intValue.ToString("N0", _currentCulture) : intValue.ToString();
                     case "OCT": return Convert.ToString(intValue, 8);
                     case "BIN": return Convert.ToString(intValue, 2);
                     default: return intValue.ToString();
@@ -345,19 +354,37 @@ namespace CalculatorMAP
 
         private void UpdateDisplayFormat()
         {
+            // Get the current culture’s decimal separator.
+            string decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator;
+
+            // Use the current Display as the raw input.
+            // (If you need to preserve a more exact raw input, consider storing it separately.)
+            string rawInput = Display;
+
+            // Determine if the raw input contains a decimal separator and count decimals.
+            int decimalCount = 0;
+            int separatorIndex = rawInput.IndexOf(decimalSeparator);
+            if (separatorIndex >= 0)
+            {
+                // Count the number of characters after the decimal separator.
+                decimalCount = rawInput.Length - separatorIndex - decimalSeparator.Length;
+            }
+
+            // Try to parse the current value.
             if (!TryParseCurrentValue(out double value))
-                return; // Don't update if display contains error message
+                return; // Abort update if parsing fails
 
             if (IsProgrammerMode)
             {
-                // In Programmer mode, format according to selected base
+                // In Programmer mode, formatting is based on the selected base.
                 switch (NumberBase)
                 {
                     case "HEX":
                         Display = Convert.ToString((int)value, 16).ToUpper();
                         break;
                     case "DEC":
-                        Display = DigitGrouping ? ((int)value).ToString("N0") : ((int)value).ToString();
+                        // For programmer mode DEC, just format as an integer.
+                        Display = DigitGrouping ? ((int)value).ToString("N0", _currentCulture) : ((int)value).ToString();
                         break;
                     case "OCT":
                         Display = Convert.ToString((int)value, 8);
@@ -369,10 +396,48 @@ namespace CalculatorMAP
             }
             else
             {
-                // In Standard mode, handle floating point values
-                Display = DigitGrouping ? value.ToString("N") : value.ToString("G");
+                // Standard mode: handle floating point values.
+                if (DigitGrouping)
+                {
+                    // If the user has typed a decimal separator...
+                    if (separatorIndex >= 0)
+                    {
+                        // If there are no digits after the decimal (e.g. "6."), preserve the trailing separator.
+                        if (decimalCount == 0)
+                        {
+                            Display = ((int)value).ToString("N0", _currentCulture) + decimalSeparator;
+                        }
+                        else
+                        {
+                            // Build the format string dynamically based on the number of decimals.
+                            string formatSpecifier = "N" + decimalCount.ToString();
+                            Display = value.ToString(formatSpecifier, _currentCulture);
+                        }
+                    }
+                    else
+                    {
+                        // No decimal separator in raw input.
+                        if (value == Math.Floor(value))
+                            Display = ((int)value).ToString("N0", _currentCulture);
+                        else
+                            // Default to "N" format if the user didn't type a decimal separator.
+                            Display = value.ToString("N", _currentCulture);
+                    }
+                }
+                else
+                {
+                    // Without digit grouping, just use the general format.
+                    Display = value.ToString("G", _currentCulture);
+                }
             }
+
             OnPropertyChanged(nameof(Display));
+
+            // Update the ExpressionList's last element (if it's an operand) so it stays in sync.
+            if (ExpressionList.Count % 2 == 1)
+            {
+                ExpressionList[ExpressionList.Count - 1] = Display;
+            }
         }
 
         private void UpdateMemoryState()
@@ -527,6 +592,8 @@ namespace CalculatorMAP
                     Display += number;
                 }
             }
+            UpdateDisplayFormat();
+
         }
 
         private void HandleEquals()
@@ -572,13 +639,12 @@ namespace CalculatorMAP
        
         private void HandleDecimal()
         {
-            if (ExpressionList.Count > 0)
+            string decimalSeparator = _currentCulture.NumberFormat.NumberDecimalSeparator;
+            // Check if there's already a decimal separator in the current operand
+            if (ExpressionList.Count > 0 && !Display.Contains(decimalSeparator))
             {
-                if (ExpressionList[ExpressionList.Count - 1].All(c=> char.IsDigit(c)||c=='-'))
-                {
-                    ExpressionList[ExpressionList.Count - 1] += ".";
-                    Display += ".";
-                }
+                ExpressionList[ExpressionList.Count - 1] += decimalSeparator;
+                Display += decimalSeparator;
             }
         }
 

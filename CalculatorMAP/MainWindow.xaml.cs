@@ -19,7 +19,7 @@ namespace CalculatorMAP
         private AppViewModel ViewModel => DataContext as AppViewModel;
         public MainWindow()
         {
-            InitializeComponent();
+           InitializeComponent();
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
         }
 
