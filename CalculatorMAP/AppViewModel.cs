@@ -664,11 +664,11 @@ namespace CalculatorMAP
                 Display = "-" + Display;
                 if ((ExpressionList.Count) % 2 != 0)
                 {
-                    ExpressionList[ExpressionList.Count - 1] = '-' + ExpressionList[ExpressionList.Count - 1];
+                    ExpressionList[ExpressionList.Count - 1] = Display;
                 }
                 else
                 {
-                    ExpressionList[ExpressionList.Count - 2] = '-' + ExpressionList[ExpressionList.Count - 2];
+                    ExpressionList[ExpressionList.Count - 2] = Display;
                 }
             }
             else if (Display.Length > 0 && Display[0] == '-')
@@ -676,11 +676,11 @@ namespace CalculatorMAP
                 Display = Display.Substring(1);
                 if ((ExpressionList.Count) % 2 != 0)
                 {
-                    ExpressionList[ExpressionList.Count - 1] = ExpressionList[ExpressionList.Count - 1].Substring(1);
+                    ExpressionList[ExpressionList.Count - 1] = Display;
                 }
                 else
                 {
-                    ExpressionList[ExpressionList.Count - 2] = ExpressionList[ExpressionList.Count - 2].Substring(1);
+                    ExpressionList[ExpressionList.Count - 2] = Display;
                 }
                 
             }
