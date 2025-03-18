@@ -1,5 +1,5 @@
 # Calculator App
-A Windows-inspired Calculator app, developed by means of C# and WPF (.NET Framework), part of my university's Advanced Programming Environments Course
+A Windows-inspired Calculator app, developed by means of C# and WPF (.NET), part of my university's Advanced Programming Environments Course
 
 ## Features 
 * **MVVM Architecture**
